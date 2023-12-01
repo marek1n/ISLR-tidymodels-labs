@@ -7,7 +7,7 @@ source("_common.R")
 ```
 
 This lab will go over how to perform linear regression. This will include [simple linear regression](03-linear-regression.qmd#simple-linear-regression) and [multiple linear regression](03-linear-regression.qmd#multiple-linear-regression) in addition to how you can apply transformations to the predictors. This chapter will use [parsnip](https://www.tidymodels.org/start/models/) for model fitting and [recipes and workflows](https://www.tidymodels.org/start/recipes/) to perform the transformations.
- 
+
 ## Libraries
 
 We load tidymodels and ISLR and MASS for data sets.
@@ -23,7 +23,7 @@ library(ISLR)
 
 The `Boston` data set contains various statistics for 506 neighborhoods in Boston. We will build a simple linear regression model that related the median value of owner-occupied homes (`medv`) as the response with a variable indicating the percentage of the population that belongs to a lower status (`lstat`) as the predictor.
 
-:::{.callout-important}
+::: callout-important
 The `Boston` data set is quite outdated and contains some really unfortunate variables.
 :::
 
@@ -43,9 +43,7 @@ The specification doesn't perform any calculations by itself. It is just a speci
 lm_spec
 ```
 
-Once we have the specification we can `fit` it by supplying a formula expression and the data we want to fit the model on.
-The formula is written on the form `y ~ x` where `y` is the name of the response and `x` is the name of the predictors.
-The names used in the formula should match the names of the variables in the data set passed to `data`.
+Once we have the specification we can `fit` it by supplying a formula expression and the data we want to fit the model on. The formula is written on the form `y ~ x` where `y` is the name of the response and `x` is the name of the predictors. The names used in the formula should match the names of the variables in the data set passed to `data`.
 
 ```{r}
 lm_fit <- lm_spec %>%
@@ -98,31 +96,31 @@ predict(lm_fit, new_data = Boston)
 
 Notice how the predictions are returned as a tibble. This will always be the case for parsnip models, no matter what engine is used. This is very useful since consistency allows us to combine data sets easily.
 
-We can also return other types of predicts by specifying the `type` argument. Setting `type = "conf_int"` return a 95% confidence interval. 
+We can also return other types of predicts by specifying the `type` argument. Setting `type = "conf_int"` return a 95% confidence interval.
 
 ```{r}
 predict(lm_fit, new_data = Boston, type = "conf_int")
 ```
 
-:::{.callout-note}
+::: callout-note
 Not all engines can return all types of predictions.
 :::
 
-If you want to evaluate the performance of a model, you might want to compare the observed value and the predicted value for a data set. You 
+If you want to evaluate the performance of a model, you might want to compare the observed value and the predicted value for a data set. You
 
 ```{r}
 bind_cols(
   predict(lm_fit, new_data = Boston),
   Boston
 ) %>%
-  select(medv, .pred)
+  dplyr::select(medv, .pred)
 ```
 
 You can get the same results using the `augment()` function to save you a little bit of typing.
 
 ```{r}
 augment(lm_fit, new_data = Boston) %>% 
-  select(medv, .pred)
+  dplyr::select(medv, .pred)
 ```
 
 ## Multiple linear regression
@@ -165,8 +163,8 @@ Adding interaction terms is quite easy to do using formula expressions. However,
 
 There are two ways on including an interaction term; `x:y` and `x * y`
 
-- `x:y` will include the interaction between `x` and `y`,
-- `x * y` will include the interaction between `x` and `y`, `x`, and `y`, i.e. it is short for `x:y + x + y`.
+-   `x:y` will include the interaction between `x` and `y`,
+-   `x * y` will include the interaction between `x` and `y`, `x`, and `y`, i.e. it is short for `x:y + x + y`.
 
 with that out of the way let expand `lm_fit2` by adding an interaction term
 
@@ -230,9 +228,9 @@ lm_wf_log %>% fit(Boston)
 
 We will now turn our attention to the `Carseats` data set. We will attempt to predict `Sales` of child car seats in 400 locations based on a number of predictors. One of these variables is `ShelveLoc` which is a qualitative predictor that indicates the quality of the shelving location. `ShelveLoc` takes on three possible values
 
-- Bad
-- Medium
-- Good
+-   Bad
+-   Medium
+-   Good
 
 If you pass such a variable to `lm()` it will read it and generate dummy variables automatically using the following convention.
 
@@ -249,8 +247,7 @@ lm_spec %>%
   fit(Sales ~ . + Income:Advertising + Price:Age, data = Carseats)
 ```
 
-However, as with so many things, we can not always guarantee that the underlying engine knows how to deal with qualitative variables. Recipes can be used to handle this as well. The `step_dummy()` will perform the same transformation of turning 1 qualitative with `C` levels into `C-1` indicator variables.
-While this might seem unnecessary right now, some of the engines, later on, do not handle qualitative variables and this step would be necessary. We are also using the `all_nominal_predictors()` selector to select all character and factor predictor variables. This allows us to select by type rather than having to type out the names.
+However, as with so many things, we can not always guarantee that the underlying engine knows how to deal with qualitative variables. Recipes can be used to handle this as well. The `step_dummy()` will perform the same transformation of turning 1 qualitative with `C` levels into `C-1` indicator variables. While this might seem unnecessary right now, some of the engines, later on, do not handle qualitative variables and this step would be necessary. We are also using the `all_nominal_predictors()` selector to select all character and factor predictor variables. This allows us to select by type rather than having to type out the names.
 
 ```{r}
 rec_spec <- recipe(Sales ~ ., data = Carseats) %>%
